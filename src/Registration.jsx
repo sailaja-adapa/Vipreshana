@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useTheme } from './context/ThemeContext';
+import { Link } from 'react-router-dom';
+
 
 
 const RegistrationForm = () => {
@@ -220,16 +222,16 @@ const RegistrationForm = () => {
                     >
                         Register
                     </button>
-                    <p className={`text-center text-sm mt-4 transition-colors duration-300 ${
-                        isDark ? 'text-gray-300' : 'text-gray-600'
-                    }`}>
-                        Already have an account?{' '}
-                        <button className={`font-semibold hover:underline bg-transparent border-none cursor-pointer transition-colors duration-300 ${
-                            isDark ? 'text-blue-400' : 'text-blue-600'
-                        }`}>
-                            Login
-                        </button>
-                    </p>
+                   
+               
+                  <p className={`text-center text-sm mt-4 transition-colors duration-300 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                   Already have an account?{' '}
+                  <Link to="/login" className={
+                    `font-semibold hover:underline bg-transparent border-none cursor-pointer transition-colors duration-300 ${isDark ? 'text-blue-400' : 'text-blue-600'}`
+                    }>Login</Link>
+</p>
+
+
                 </div>
             </div>
         </div>
