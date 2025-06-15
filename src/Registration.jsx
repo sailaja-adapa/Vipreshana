@@ -223,7 +223,7 @@ const RegistrationForm = () => {
                     <p className={`text-center text-sm mt-4 transition-colors duration-300 ${
                         isDark ? 'text-gray-300' : 'text-gray-600'
                     }`}>
-                        Don't have an account?{' '}
+                        Already have an account?{' '}
                         <button className={`font-semibold hover:underline bg-transparent border-none cursor-pointer transition-colors duration-300 ${
                             isDark ? 'text-blue-400' : 'text-blue-600'
                         }`}>
