@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import Footer from './Footer';
 import { Sun, Moon, Car, Truck, Bus, MapPin, User, Phone, Calculator, Sparkles, CheckCircle, AlertCircle, Navigation } from 'lucide-react';
 
 function debounce(func, delay) {
@@ -184,7 +185,7 @@ const TransportBooking = () => {
   const isDark = theme === 'dark';
 
   return (
-    <div className={`min-h-screen transition-all duration-500 ${
+    <div className={`min-h-screen flex flex-col justify-between transition-all duration-500 ${
       isDark 
         ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900' 
         : 'bg-gradient-to-br from-indigo-50 via-white to-cyan-50'
@@ -440,9 +441,12 @@ const TransportBooking = () => {
         <div className="text-center mt-6">
           <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
             Safe, reliable transportation • Available 24/7 • Trusted by thousands
+           
+            
           </p>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 };
