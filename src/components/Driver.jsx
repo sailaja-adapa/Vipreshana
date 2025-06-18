@@ -2,18 +2,23 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useTheme } from '../context/ThemeContext';
+import Navbar from './Navbar'; // <-- IMPORT NAVBAR!
+import { User, Phone, MapPin, Navigation, Package, DollarSign, Truck, Clock, CheckCircle } from 'lucide-react';
+
+const API_BASE_URL = 'https://vipreshana-3.onrender.com';
+
 const Driver = () => {
     const [bookings, setBookings] = useState([]);
     const [acceptedBooking, setAcceptedBooking] = useState(null);
     const [showDetails, setShowDetails] = useState(false);
     const [jobStatus, setJobStatus] = useState('');
     const [loading, setLoading] = useState(true);
-    const { theme, toggleTheme } = useTheme();
+    const { theme } = useTheme(); // No need for toggleTheme here
 
     useEffect(() => {
         const fetchBookings = async () => {
             try {
-                const response = await axios.get('https://vipreshana-3.onrender.com/api/details');
+                const response = await axios.get(`${API_BASE_URL}/api/details`);
                 setBookings(response.data); 
             } catch (error) {
                 console.error('Error fetching bookings:', error);
@@ -32,7 +37,7 @@ const Driver = () => {
             return;
         }
         try {
-            await axios.put(`https://vipreshana-3.onrender.com/api/details/${booking._id}/accept`, {
+            await axios.put(`${API_BASE_URL}/api/details/${booking._id}/accept`, {
                 accepted_booking: 'accepted'
             });
             setAcceptedBooking(booking);
@@ -63,7 +68,7 @@ const Driver = () => {
     const handleUpdateStatus = async (status) => {
         setJobStatus(status);
         try {
-            await axios.put(`https://vipreshana-3.onrender.com/api/details/${acceptedBooking._id}/status`, { status });
+            await axios.put(`${API_BASE_URL}/api/details/${acceptedBooking._id}/status`, { status });
             setAcceptedBooking(prevBooking => ({ ...prevBooking, status }));
             setBookings(prevBookings =>
                 prevBookings.map(booking =>
@@ -83,16 +88,16 @@ const Driver = () => {
     
         try {
             // Mark as delivered
-            await axios.put(`https://vipreshana-3.onrender.com/api/details/${acceptedBooking._id}/status`, { status: 'Delivered' });
+            await axios.put(`${API_BASE_URL}/api/details/${acceptedBooking._id}/status`, { status: 'Delivered' });
             
             // Send delivery message
-            await axios.post('https://vipreshana-3.onrender.com/api/details/deliver', {
+            await axios.post(`${API_BASE_URL}/api/details/deliver`, {
                 phone: acceptedBooking.phone,
                 message: `Dear ${acceptedBooking.name}, Your goods have been delivered from ${acceptedBooking.pickupLocation} to ${acceptedBooking.dropoffLocation} safely.`
             });
     
             // Delete the booking from the database
-            await axios.delete(`https://vipreshana-3.onrender.com/api/details/${acceptedBooking._id}`);
+            await axios.delete(`${API_BASE_URL}/api/details/${acceptedBooking._id}`);
     
             // Update state to remove the delivered booking
             setBookings(prevBookings => prevBookings.filter(booking => booking._id !== acceptedBooking._id));
@@ -105,151 +110,285 @@ const Driver = () => {
         }
     };
 
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'Pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            case 'Enroute to Pick up': return 'bg-blue-100 text-blue-800 border-blue-200';
+            case 'Picked Goods': return 'bg-orange-100 text-orange-800 border-orange-200';
+            case 'Delivered': return 'bg-green-100 text-green-800 border-green-200';
+            default: return 'bg-gray-100 text-gray-800 border-gray-200';
+        }
+    };
+
+    const getStatusIcon = (status) => {
+        switch (status) {
+            case 'Pending': return <Clock className="w-4 h-4" />;
+            case 'Enroute to Pick up': return <Navigation className="w-4 h-4" />;
+            case 'Picked Goods': return <Package className="w-4 h-4" />;
+            case 'Delivered': return <CheckCircle className="w-4 h-4" />;
+            default: return <Clock className="w-4 h-4" />;
+        }
+    };
+
     const isDark = theme === 'dark';
     
     if (loading) {
         return (
             <div className={`min-h-screen flex items-center justify-center transition-all duration-300 ${
-                isDark ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'
+                isDark ? 'bg-gray-900' : 'bg-gray-50'
             }`}>
-                <p className="text-xl">Loading bookings...</p>
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className={`text-xl ${isDark ? 'text-white' : 'text-gray-800'}`}>Loading bookings...</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div 
-            className={`p-4 min-h-screen transition-all duration-300 ${
-                isDark ? 'brightness-75' : 'brightness-100'
-            }`} 
-            style={{ 
-                backgroundImage: 'url(https://images.unsplash.com/photo-1547628641-ec2098bb5812?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8M3x8fGVufDB8fHx8fA%3D%3D)', 
-                backgroundSize: 'cover', 
-                backgroundPosition: 'center', 
-                backgroundRepeat: 'no-repeat' 
-            }}
-        >
-            {/* Theme Toggle Button */}
-            <button
-                onClick={toggleTheme}
-                className={`fixed top-6 right-6 p-3 rounded-full transition-all duration-300 z-10 ${
-                    isDark 
-                        ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300' 
-                        : 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
-                }`}
-                aria-label="Toggle theme"
+        <div className={`min-h-screen transition-all duration-300 ${
+            isDark ? 'bg-gray-900' : 'bg-gray-50'
+        }`}>
+            <Navbar /> {/* RENDER NAVBAR HERE */}
+
+            {/* Hero Section with Background Image */}
+            <div 
+                className="relative h-80 bg-cover bg-center bg-no-repeat"
+                style={{ 
+                    backgroundImage: 'url(https://images.unsplash.com/photo-1547628641-ec2098bb5812?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8M3x8fGVufDB8fHx8fA%3D%3D)'
+                }}
             >
-                {isDark ? '☀️' : '🌙'}
-            </button>
+                <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/70" />
+                <div className="relative z-10 flex items-center justify-center h-full text-center text-white px-6">
+                    <div>
+                        <h1 className="text-5xl font-bold mb-4">Driver Dashboard</h1>
+                        <p className="text-xl opacity-90">Manage your delivery assignments efficiently</p>
+                        <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto mt-6 rounded-full" />
+                    </div>
+                </div>
+            </div>
 
-            <div className={`p-6 rounded-lg shadow-lg max-w-4xl mx-auto transition-all duration-300 ${
-                isDark 
-                    ? 'bg-gray-800 bg-opacity-90 text-white border border-gray-700' 
-                    : 'bg-white bg-opacity-80 text-gray-900'
-            }`}>
-                <h1 className={`text-3xl font-bold mb-4 text-center transition-colors duration-300 ${
-                    isDark ? 'text-blue-400' : 'text-blue-600'
-                }`}>Driver Dashboard</h1>
-                
-                {bookings.length > 0 ? (
-                    bookings.map(booking => (
-                        <div 
-                            key={booking._id} 
-                            className={`mb-4 p-4 border rounded-lg shadow-md transition-all duration-300 ${
-                                isDark 
-                                    ? 'border-gray-600 bg-gray-700 text-white' 
-                                    : 'border-gray-300 bg-white text-gray-900'
-                            }`}
-                        >
-                            <h2 className={`text-xl font-semibold transition-colors duration-300 ${
-                                isDark ? 'text-gray-200' : 'text-gray-800'
-                            }`}>Booking Details</h2>
-                            <p className={`text-lg transition-colors duration-300 ${
-                                isDark ? 'text-gray-300' : 'text-gray-700'
-                            }`}>📍 Pickup Location: {booking.pickupLocation}</p>
-                            <p className={`text-lg transition-colors duration-300 ${
-                                isDark ? 'text-gray-300' : 'text-gray-700'
-                            }`}>🚖 Drop-off Location: {booking.dropoffLocation}</p>
-                            <p className={`text-lg transition-colors duration-300 ${
-                                isDark ? 'text-gray-300' : 'text-gray-700'
-                            }`}>💲 Estimated Cost: {booking.estimatedCost}</p>
-                            <p className={`text-lg transition-colors duration-300 ${
-                                isDark ? 'text-gray-300' : 'text-gray-700'
-                            }`}>🚗 Vehicle Type: {booking.vehicleType}</p>
-                            <p className={`text-lg transition-colors duration-300 ${
-                                isDark ? 'text-gray-300' : 'text-gray-700'
-                            }`}>✅ Status: {booking.status}</p>
-
-                            <div className="mt-4">
-                                {booking.accepted_booking === 'accepted' ? (
-                                    <button
-                                        className={`font-bold py-2 px-4 rounded mr-2 transition-all duration-300 ${
-                                            isDark
-                                                ? 'bg-gray-600 hover:bg-gray-500 text-white'
-                                                : 'bg-gray-500 hover:bg-gray-700 text-white'
-                                        }`}
-                                        onClick={() => toggleDetails(booking)}
-                                    >
-                                        {showDetails && acceptedBooking && acceptedBooking._id === booking._id ? "Hide Details" : "View Details"}
-                                    </button>
-                                ) : (
-                                    <button
-                                        className={`font-bold py-2 px-4 rounded mr-2 transition-all duration-300 ${
-                                            isDark
-                                                ? 'bg-blue-500 hover:bg-blue-400 text-white'
-                                                : 'bg-blue-500 hover:bg-blue-700 text-white'
-                                        }`}
-                                        onClick={() => handleAcceptBooking(booking)}
-                                    >
-                                        Accept
-                                    </button>
-                                )}
-                            </div>
-
-                            {acceptedBooking && acceptedBooking._id === booking._id && showDetails && (
-                                <div className={`mt-4 p-2 border rounded-lg shadow-inner transition-all duration-300 ${
-                                    isDark 
-                                        ? 'border-gray-600 bg-gray-800' 
-                                        : 'border-gray-200 bg-gray-50'
-                                }`}>
-                                    <h2 className={`text-lg font-semibold transition-colors duration-300 ${
-                                        isDark ? 'text-gray-200' : 'text-gray-800'
-                                    }`}>Job Assignment:</h2>
-                                    <p className={`transition-colors duration-300 ${
-                                        isDark ? 'text-gray-300' : 'text-gray-700'
-                                    }`}>👤 Name: {acceptedBooking.name}</p>
-                                    <p className={`transition-colors duration-300 ${
-                                        isDark ? 'text-gray-300' : 'text-gray-700'
-                                    }`}>📞 Phone number: {acceptedBooking.phone}</p>
-                                    <div className="mt-4 space-y-2">
-                                        <button
-                                            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2 transition-all duration-300"
-                                            onClick={() => handleUpdateStatus('Enroute to Pick up')}
-                                        >
-                                            Enroute to Pick up
-                                        </button>
-                                        <button
-                                            className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mr-2 transition-all duration-300"
-                                            onClick={() => handleUpdateStatus('Picked Goods')}
-                                        >
-                                            Picked Goods
-                                        </button>
-                                        <button
-                                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-all duration-300"
-                                            onClick={handleDelivery}
-                                        >
-                                            Delivered
-                                        </button>
-                                    </div>
+            {/* Main Content */}
+            <div className="p-6 -mt-20 relative z-10">
+                <div className="max-w-6xl mx-auto">
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                        <div className={`p-6 rounded-2xl shadow-xl border-2 transform hover:scale-105 transition-all duration-300 ${
+                            isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-blue-100 text-gray-800'
+                        }`}>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className={`text-sm font-semibold uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        Total Bookings
+                                    </p>
+                                    <p className="text-3xl font-bold mt-2">{bookings.length}</p>
                                 </div>
-                            )}
+                                <div className="p-3 bg-blue-500 rounded-full">
+                                    <Package className="w-8 h-8 text-white" />
+                                </div>
+                            </div>
                         </div>
-                    ))
-                ) : (
-                    <p className={`text-center text-lg transition-colors duration-300 ${
-                        isDark ? 'text-gray-300' : 'text-gray-700'
-                    }`}>No bookings available</p>
-                )}
+                        
+                        <div className={`p-6 rounded-2xl shadow-xl border-2 transform hover:scale-105 transition-all duration-300 ${
+                            isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-green-100 text-gray-800'
+                        }`}>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className={`text-sm font-semibold uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        Accepted Jobs
+                                    </p>
+                                    <p className="text-3xl font-bold mt-2">
+                                        {bookings.filter(b => b.accepted_booking === 'accepted').length}
+                                    </p>
+                                </div>
+                                <div className="p-3 bg-green-500 rounded-full">
+                                    <CheckCircle className="w-8 h-8 text-white" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className={`p-6 rounded-2xl shadow-xl border-2 transform hover:scale-105 transition-all duration-300 ${
+                            isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-yellow-100 text-gray-800'
+                        }`}>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className={`text-sm font-semibold uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        Pending Jobs
+                                    </p>
+                                    <p className="text-3xl font-bold mt-2">
+                                        {bookings.filter(b => b.accepted_booking !== 'accepted').length}
+                                    </p>
+                                </div>
+                                <div className="p-3 bg-yellow-500 rounded-full">
+                                    <Clock className="w-8 h-8 text-white" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bookings List */}
+                    {bookings.length > 0 ? (
+                        <div className="space-y-6">
+                            {bookings.map((booking, index) => (
+                                <div 
+                                    key={booking._id}
+                                    className={`rounded-2xl shadow-xl border-2 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] ${
+                                        isDark 
+                                            ? 'bg-gray-800 border-gray-700 text-white' 
+                                            : 'bg-white border-gray-200 text-gray-800'
+                                    }`}
+                                    style={{ animationDelay: `${index * 100}ms` }}
+                                >
+                                    {/* Booking Header */}
+                                    <div className="p-6 border-b border-gray-200/20">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-xl font-semibold">Booking Details</h3>
+                                            <div className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-2 ${getStatusColor(booking.status)}`}>
+                                                {getStatusIcon(booking.status)}
+                                                {booking.status}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <div className="flex items-center gap-3">
+                                                <MapPin className="w-5 h-5 text-green-500" />
+                                                <div>
+                                                    <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        Pickup Location
+                                                    </p>
+                                                    <p className="text-sm font-medium">{booking.pickupLocation}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-3">
+                                                <Navigation className="w-5 h-5 text-red-500" />
+                                                <div>
+                                                    <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        Drop-off Location
+                                                    </p>
+                                                    <p className="text-sm font-medium">{booking.dropoffLocation}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-3">
+                                                <DollarSign className="w-5 h-5 text-green-600" />
+                                                <div>
+                                                    <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        Estimated Cost
+                                                    </p>
+                                                    <p className="text-sm font-bold text-green-600">{booking.estimatedCost}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-3">
+                                                <Truck className="w-5 h-5 text-blue-500" />
+                                                <div>
+                                                    <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        Vehicle Type
+                                                    </p>
+                                                    <p className="text-sm font-medium">{booking.vehicleType}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="p-6">
+                                        {booking.accepted_booking === 'accepted' ? (
+                                            <button
+                                                onClick={() => toggleDetails(booking)}
+                                                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
+                                                    isDark
+                                                        ? 'bg-gray-700 hover:bg-gray-600 text-white hover:shadow-lg'
+                                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-800 hover:shadow-lg'
+                                                } hover:scale-[1.02]`}
+                                            >
+                                                {showDetails && acceptedBooking && acceptedBooking._id === booking._id 
+                                                    ? "Hide Details" : "View Details"}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleAcceptBooking(booking)}
+                                                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] transform"
+                                            >
+                                                Accept
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Job Details Panel */}
+                                    {acceptedBooking && acceptedBooking._id === booking._id && showDetails && (
+                                        <div className={`mx-6 mb-6 p-6 rounded-xl border-2 border-dashed transition-all duration-300 ${
+                                            isDark 
+                                                ? 'border-gray-600 bg-gray-900/50' 
+                                                : 'border-gray-300 bg-gray-50/80'
+                                        }`}>
+                                            <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                                <User className="w-5 h-5" />
+                                                Job Assignment:
+                                            </h4>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                                <div className="flex items-center gap-3">
+                                                    <User className="w-5 h-5 text-blue-500" />
+                                                    <div>
+                                                        <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                            Name
+                                                        </p>
+                                                        <p className="text-sm font-medium">{acceptedBooking.name}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex items-center gap-3">
+                                                    <Phone className="w-5 h-5 text-green-500" />
+                                                    <div>
+                                                        <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                            Phone number
+                                                        </p>
+                                                        <p className="text-sm font-medium">{acceptedBooking.phone}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-3">
+                                                <button
+                                                    onClick={() => handleUpdateStatus('Enroute to Pick up')}
+                                                    className="flex-1 min-w-[150px] bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
+                                                >
+                                                    Enroute to Pick up
+                                                </button>
+                                                
+                                                <button
+                                                    onClick={() => handleUpdateStatus('Picked Goods')}
+                                                    className="flex-1 min-w-[150px] bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
+                                                >
+                                                    Picked Goods
+                                                </button>
+                                                
+                                                <button
+                                                    onClick={handleDelivery}
+                                                    className="flex-1 min-w-[150px] bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
+                                                >
+                                                    Delivered
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className={`text-center py-16 rounded-2xl shadow-xl border-2 ${
+                            isDark 
+                                ? 'bg-gray-800 border-gray-700 text-gray-300' 
+                                : 'bg-white border-gray-200 text-gray-600'
+                        }`}>
+                            <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                            <h3 className="text-xl font-semibold mb-2">No bookings available</h3>
+                            <p>New delivery requests will appear here when they become available.</p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Footer from './Footer';
 import { Sun, Moon, Car, Truck, Bus, MapPin, User, Phone, Calculator, Sparkles, CheckCircle, AlertCircle, Navigation } from 'lucide-react';
+import Navbar from './Navbar'; // <-- Import your Navbar component!
+
+const API_BASE_URL = 'https://vipreshana-3.onrender.com';
 
 function debounce(func, delay) {
   let timeout;
@@ -45,7 +48,7 @@ const getBaseCost = (vehicleType) => {
 };
 
 const TransportBooking = () => {
-  const [theme, setTheme] = useState('light');
+  // Remove local theme state, Navbar will handle theme toggle
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [pickupLocation, setPickupLocation] = useState('');
@@ -56,6 +59,9 @@ const TransportBooking = () => {
   const [calculating, setCalculating] = useState(false);
   const [cities, setCities] = useState([]);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
+
+  // You can optionally use a theme context if you want dark/light mode to be global
+  // For now, we'll keep this simple and use default light theme styles
 
   useEffect(() => {
     setCities(Object.keys(cityCoordinates));
@@ -128,7 +134,7 @@ const TransportBooking = () => {
 
     try {
       if (estimatedCost !== null) {
-        const response = await fetch('https://vipreshana-3.onrender.com/api/bookings', {
+        const response = await fetch(`${API_BASE_URL}/api/bookings`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -160,10 +166,6 @@ const TransportBooking = () => {
     }
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
-
   const getVehicleIcon = (type) => {
     switch (type) {
       case 'Car': return <Car className="w-5 h-5" />;
@@ -182,7 +184,8 @@ const TransportBooking = () => {
     }
   };
 
-  const isDark = theme === 'dark';
+  // Set light as default, but if you want global theme, use context/provider
+  const isDark = false;
 
   return (
     <div className={`min-h-screen flex flex-col justify-between transition-all duration-500 ${
@@ -191,6 +194,8 @@ const TransportBooking = () => {
         : 'bg-gradient-to-br from-indigo-50 via-white to-cyan-50'
     } flex items-center justify-center p-4 sm:p-6 lg:p-8`}>
       
+      <Navbar /> {/* Render Navbar at the top */}
+
       {toast.show && (
         <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg transform transition-all duration-300 backdrop-blur-sm ${
           toast.type === 'success' 
@@ -227,18 +232,7 @@ const TransportBooking = () => {
         }`}>
           
           <div className="text-center mb-8 relative">
-            <button
-              onClick={toggleTheme}
-              className={`absolute top-0 right-0 p-3 rounded-full transition-all duration-200 ${
-                isDark 
-                  ? 'bg-gray-700/50 hover:bg-gray-600/50 text-yellow-400' 
-                  : 'bg-gray-100/50 hover:bg-gray-200/50 text-gray-800'
-              }`}
-              aria-label="Toggle theme"
-            >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-
+            {/* Remove theme toggle button, Navbar handles theme */}
             <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-lg ${
               isDark
                 ? 'bg-gradient-to-br from-blue-600 to-purple-600'

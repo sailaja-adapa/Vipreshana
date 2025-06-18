@@ -1,0 +1,32 @@
+.loader-container {
+  height: 100vh;
+  width: 100vw;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader-gif {
+  width: 200px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.loader-text {
+  font-size: 2.5rem;
+  color: #000000;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+  animation: fadeIn 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}

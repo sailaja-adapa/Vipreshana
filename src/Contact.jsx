@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import { useTheme } from './context/ThemeContext';
 import Footer from './components/Footer';
 
 
+import Navbar from './components/Navbar'; // Import Navbar
+import PageMeta from './components/Pagemeta';
 const contacts = [
   {
     name: 'GitHub',
@@ -71,6 +73,126 @@ return (
   </div>
 );
 
-}
+
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
+
+  return (
+    <>
+    <PageMeta /> 
+      <Navbar />
+      <div className={`min-h-screen flex flex-col items-center justify-center p-4 transition-all duration-700 font-inter relative overflow-hidden ${
+        isDark
+          ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700'
+          : 'bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100'
+      }`}>
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className={`absolute top-20 left-20 w-32 h-32 rounded-full opacity-20 animate-pulse ${
+            isDark ? 'bg-gradient-to-r from-blue-500 to-purple-500' : 'bg-gradient-to-r from-pink-400 to-purple-400'
+          }`}></div>
+          <div className={`absolute top-1/3 right-16 w-24 h-24 transform rotate-45 opacity-30 animate-bounce ${
+            isDark ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gradient-to-r from-blue-400 to-purple-400'
+          }`} style={{ animationDuration: '3s' }}></div>
+          <div className={`absolute bottom-32 left-16 w-20 h-20 rounded-full opacity-25 animate-pulse ${
+            isDark ? 'bg-gradient-to-r from-cyan-500 to-blue-500' : 'bg-gradient-to-r from-purple-400 to-pink-400'
+          }`} style={{ animationDelay: '1s' }}></div>
+          <div className={`absolute bottom-20 right-20 w-28 h-28 transform rotate-12 opacity-20 animate-bounce ${
+            isDark ? 'bg-gradient-to-r from-pink-500 to-purple-500' : 'bg-gradient-to-r from-cyan-400 to-blue-400'
+          }`} style={{ animationDuration: '4s', animationDelay: '2s' }}></div>
+        </div>
+
+        <div className={`relative shadow-2xl rounded-3xl p-10 max-w-lg w-full text-center transition-all duration-1000 transform backdrop-blur-sm ${
+          isLoaded ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'
+        } ${isDark ? 'bg-gray-900/90 border border-gray-700' : 'bg-white/90 border border-white/50'}`}>
+          <div className={`transition-all duration-1000 transform ${
+            isLoaded ? 'translate-y-0 opacity-100' : '-translate-y-5 opacity-0'
+          }`} style={{ transitionDelay: '200ms' }}>
+            <h1 className={`text-5xl font-bold mb-2 bg-clip-text leading-tight ${
+              isDark
+                ? 'text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500'
+                : 'text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500'
+            }`}>
+              Contact Us
+            </h1>
+            <div className={`mx-auto mb-6 h-1 w-24 rounded-full bg-gradient-to-r ${
+              isDark 
+                ? 'from-blue-400 via-purple-400 to-pink-400' 
+                : 'from-blue-500 via-purple-500 to-pink-500'
+            } transition-all duration-1000 transform ${
+              isLoaded ? 'scale-x-100' : 'scale-x-0'
+            }`} style={{ transitionDelay: '400ms' }}></div>
+          </div>
+
+          <p className={`mb-10 text-lg leading-relaxed transition-all duration-1000 transform ${
+            isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'
+          } ${isDark ? 'text-gray-300' : 'text-gray-600'}`}
+          style={{ transitionDelay: '600ms' }}>
+            We'd love to hear from you! Reach out to us via any of the platforms below:
+          </p>
+
+          <div className="flex justify-center gap-7 mb-7">
+            {contacts.map((contact, index) => (
+              <div
+                key={contact.name}
+                className={`transition-all duration-1000 transform ${
+                  isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                }`}
+                style={{ transitionDelay: `${800 + index * 200}ms` }}
+              >
+                <a
+                  href={contact.url.startsWith('mailto:') ? contact.url : contact.name === 'Email' ? `mailto:${contact.url}` : contact.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex flex-col items-center p-4 rounded-2xl transition-transform duration-300 hover:scale-110 ${
+                    isDark 
+                      ? 'text-gray-300 hover:text-white' 
+                      : 'text-gray-700 hover:text-gray-900'
+                  }`}
+                  aria-label={contact.name}
+                >
+                  <div className="mb-2">
+                    {contact.icon}
+                  </div>
+                  <span className="text-sm font-semibold">
+                    {contact.name}
+                  </span>
+                </a>
+              </div>
+            ))}
+          </div>
+
+          <div className={`transition-all duration-1000 transform ${
+            isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'
+          }`} style={{ transitionDelay: '1400ms' }}>
+            <p className={`text-sm font-medium ${
+              isDark ? 'text-gray-400' : 'text-gray-500'
+            }`}>
+              Let's build something amazing together!
+            </p>
+          </div>
+        </div>
+
+        <div className={`mt-8 transition-all duration-1000 transform ${
+          isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+        }`} style={{ transitionDelay: '1600ms' }}>
+          <div className="flex justify-center space-x-2">
+            <div className={`w-2 h-2 rounded-full animate-pulse ${
+              isDark ? 'bg-blue-400' : 'bg-purple-500'
+            }`}></div>
+            <div className={`w-2 h-2 rounded-full animate-pulse ${
+              isDark ? 'bg-purple-400' : 'bg-pink-500'
+            }`} style={{ animationDelay: '0.5s' }}></div>
+            <div className={`w-2 h-2 rounded-full animate-pulse ${
+              isDark ? 'bg-pink-400' : 'bg-blue-400'
+            }`} style={{ animationDelay: '1s' }}></div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
 
 export default Contact;

@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useTheme } from './context/ThemeContext'; // Adjust the import path as necessary
-
+import PageMeta from './components/Pagemeta';
 const ResetPassword = () => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -77,6 +77,8 @@ const ResetPassword = () => {
     };
 
     return (
+        <>
+        <PageMeta /> 
         <div 
             className={`relative h-screen bg-cover bg-center transition-all duration-300 ${
                 isDark ? 'brightness-75' : 'brightness-100'
@@ -164,6 +166,7 @@ const ResetPassword = () => {
             </div>
             <ToastContainer />
         </div>
+        </>
     );
 };
 

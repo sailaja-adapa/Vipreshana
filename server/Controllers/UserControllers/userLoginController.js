@@ -22,11 +22,19 @@ const userLoginController = async (req, res) => {
             return res.status(400).json({ error: "Invalid credentials" });
         }
 
+        const payload = {
+            id: user._id,
+            name: user.name,
+            phone: user.phone,
+            role: user.role,
+            email: user.email,
+        };
+
         let redirectUrl = '/logindashboard';
         if (user.role === 'admin') redirectUrl = '/admin';
         else if (user.role === 'driver') redirectUrl = '/driver';
 
-        res.status(200).json({ message: "Login successful", redirectUrl });
+        res.status(200).json({ message: "Login successful", redirectUrl,user: payload });
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).json({ error: "Failed to log in" });
