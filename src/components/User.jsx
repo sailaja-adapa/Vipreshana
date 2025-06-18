@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import Footer from './Footer';
+
 import { Sun, Moon, Car, Truck, Bus, MapPin, User, Phone, Calculator, Sparkles, CheckCircle, AlertCircle, Navigation } from 'lucide-react';
 import Navbar from './Navbar'; // <-- Import your Navbar component!
 
@@ -440,7 +440,7 @@ const TransportBooking = () => {
           </p>
         </div>
       </div>
-      <Footer/>
+    
     </div>
   );
 };

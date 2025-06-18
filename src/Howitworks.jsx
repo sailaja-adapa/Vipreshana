@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTheme } from './context/ThemeContext';
 import { motion } from 'framer-motion';
-import Footer from './components/Footer';
+
 import Navbar from './components/Navbar';
 import PageMeta from './components/Pagemeta';
 
@@ -164,7 +164,7 @@ const HowItWorks = () => {
             </motion.button>
           </motion.div>
         </div>
-        <Footer />
+        
       </div>
     </>
   );

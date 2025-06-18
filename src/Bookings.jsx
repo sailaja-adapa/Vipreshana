@@ -4,7 +4,7 @@ import { useTheme } from "./context/ThemeContext";
 import { motion } from "framer-motion";
 import Navbar from "./components/Navbar";
 import PageMeta from "./components/Pagemeta";
-import Footer from "./components/Footer";
+
 
 const API_BASE_URL = 'https://vipreshana-3.onrender.com';
 
@@ -164,7 +164,7 @@ const UserBookings = () => {
             )}
           </div>
         </main>
-        <Footer />
+       
       </motion.div>
     </>
   );

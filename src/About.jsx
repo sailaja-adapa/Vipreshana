@@ -1,13 +1,13 @@
 import React from 'react';
 import { useTheme } from './context/ThemeContext';
 
-import Footer from './components/Footer';
+
 
 
 import { motion } from 'framer-motion';
 import Navbar from './components/Navbar'; // <-- Import Navbar
 import PageMeta from './components/Pagemeta';
-upstream/main
+
 const About = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -135,7 +135,7 @@ const About = () => {
     </main>
 
     {/* Sticky Footer at the bottom */}
-    <Footer />
+    
   </motion.div>
 </>
   );

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from './context/ThemeContext';
-import Footer from './components/Footer';
+
 import Navbar from './components/Navbar';
 import PageMeta from './components/Pagemeta';
 import FAQSection from './components/FAQs';
@@ -127,7 +127,7 @@ const Dashboard = () => {
         </div>
       </div>
       <FAQSection isDark={isDark} />
-      <Footer />
+     
     </>
   );
 };

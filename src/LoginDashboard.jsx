@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from './context/ThemeContext';
-import Footer from './components/Footer';
+
 import { Package, Plus, User, Truck, MapPin, Clock } from 'lucide-react';
 import Navbar from './components/Navbar';
 import { toast, ToastContainer } from 'react-toastify';
@@ -236,7 +236,7 @@ const LoginDashboard = () => {
           </div>
         </div>
 
-        <Footer />
+       
       </div>
     </>
   );
