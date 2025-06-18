@@ -56,6 +56,11 @@ const TransportBooking = () => {
   const [cities, setCities] = useState([]);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
+  const [nameError, setNameError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [pickupLocationError, setPickupLocationError] = useState('');
+  const [dropoffLocationError, setDropoffLocationError] = useState('');
+
   useEffect(() => {
     setCities(Object.keys(cityCoordinates));
   }, []);
@@ -118,10 +123,30 @@ const TransportBooking = () => {
   };
 
   const handleBooking = async () => {
+
+     const isValid = /^[A-Za-z\s]+$/.test(name.trim());
+     setNameError(
+       isValid ? '' : 'Name can only contain letters and spaces'
+     );
+
+    const isValid = /^[6-9]\d{9}$/.test(phone);
+    setPhoneError(
+      isValid ? '' : 'Enter a valid 10-digit phone number starting with 6-9'
+    );
+
+     setPickupLocationError(
+      pickupLocation ? '' : 'Please select a pickup location'
+    );
+
+    setDropoffLocationError(
+      dropoffLocation ? '' : 'Please select a dropoff location'
+    );
+    
     if (!name || !phone || !pickupLocation || !dropoffLocation || !vehicleType) {
       showToast('Please fill all fields', 'error');
       return;
     }
+    
 
     setLoading(true);
 
@@ -275,9 +300,12 @@ const TransportBooking = () => {
                    isDark 
                       ? 'bg-gray-700/50 border-gray-600/50 hover:text-white placeholder-gray-400 hover:bg-gray-700 text-gray-600' 
                       : 'bg-gray-50/50 border-gray-200 text-gray-900 hover:bg-white'
-                  }`}
+                  }${nameError ? 'border-red-500' : ''}`}
                   placeholder="Enter your full name"
                 />
+                {nameError && (
+                 <p className="text-red-500 text-sm mt-1">{nameError}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -295,9 +323,12 @@ const TransportBooking = () => {
                     isDark 
                       ? 'bg-gray-700/50 border-gray-600/50 hover:text-white placeholder-gray-400 hover:bg-gray-700 text-gray-600' 
                       : 'bg-gray-50/50 border-gray-200 text-gray-900 hover:bg-white'
-                  }`}
+                  }${phoneError ? 'border-red-500' : ''}`}
                   placeholder="Enter your phone number"
                 />
+                {phoneError && (
+                   <p className="text-red-500 text-sm mt-1">{phoneError}</p>
+                 )}
               </div>
             </div>
 
@@ -316,13 +347,16 @@ const TransportBooking = () => {
                     isDark 
                       ? 'bg-gray-700/50 border-gray-600/50 hover:text-white placeholder-gray-400 hover:bg-gray-700 text-gray-600' 
                       : 'bg-gray-50/50 border-gray-200 text-gray-900 hover:bg-white'
-                  }`}
+                  }${pickupLocationError ? 'border-red-500' : ''}`}
                 >
                   <option value="">Select pickup location</option>
                   {cities.map((city, index) => (
                     <option key={index} value={city}>{city}</option>
                   ))}
                 </select>
+                {pickupLocationError && (
+                   <p className="text-red-500 text-sm mt-1">{pickupLocationError}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -339,13 +373,16 @@ const TransportBooking = () => {
                     isDark 
                       ? 'bg-gray-700/50 border-gray-600/50 hover:text-white placeholder-gray-400 hover:bg-gray-700 text-gray-600' 
                       : 'bg-gray-50/50 border-gray-200 text-gray-900 hover:bg-white'
-                  }`}
+                  }${dropoffLocationError ? 'border-red-500' : ''}`}
                 >
                   <option value="">Select drop-off location</option>
                   {cities.map((city, index) => (
                     <option key={index} value={city}>{city}</option>
                   ))}
                 </select>
+                 {dropoffLocationError && (
+                   <p className="text-red-500 text-sm mt-1">{dropoffLocationError}</p>
+                )}
               </div>
             </div>
 
