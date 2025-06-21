@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Sun, Moon, Car, Truck, Bus, MapPin, User, Phone, Calculator, Sparkles, CheckCircle, AlertCircle, Navigation } from 'lucide-react';
-import Navbar from './Navbar'; // <-- Import your Navbar component!
+import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import { Sun, Moon } from 'lucide-react';
+import {useTheme} from '../context/ThemeContext'
 
-const API_BASE_URL = 'https://vipreshana-3.onrender.com';
 
 function debounce(func, delay) {
   let timeout;
@@ -22,6 +21,47 @@ const cityCoordinates = {
   Pune: { lat: 18.5204, lon: 73.8567 },
   Ahmedabad: { lat: 23.0225, lon: 72.5714 },
   Jaipur: { lat: 26.9124, lon: 75.7873 },
+  Lucknow: { lat: 26.8467, lon: 80.9462 },
+  Bhopal: { lat: 23.2599, lon: 77.4126 },
+  Indore: { lat: 22.7196, lon: 75.8577 },
+  Surat: { lat: 21.1702, lon: 72.8311 },
+  Kanpur: { lat: 26.4499, lon: 80.3319 },
+  Nagpur: { lat: 21.1458, lon: 79.0882 },
+  Patna: { lat: 25.5941, lon: 85.1376 },
+  Coimbatore: { lat: 11.0168, lon: 76.9558 },
+  Visakhapatnam: { lat: 17.6868, lon: 83.2185 },
+  Thiruvananthapuram: { lat: 8.5241, lon: 76.9366 },
+  Kochi: { lat: 9.9312, lon: 76.2673 },
+  Mysuru: { lat: 12.2958, lon: 76.6394 },
+  Vadodara: { lat: 22.3072, lon: 73.1812 },
+  Ranchi: { lat: 23.3441, lon: 85.3096 },
+  Raipur: { lat: 21.2514, lon: 81.6296 },
+  Jabalpur: { lat: 23.1815, lon: 79.9864 },
+  Varanasi: { lat: 25.3176, lon: 82.9739 },
+  Gwalior: { lat: 26.2183, lon: 78.1828 },
+  Dehradun: { lat: 30.3165, lon: 78.0322 },
+  Shimla: { lat: 31.1048, lon: 77.1734 },
+  Udaipur: { lat: 24.5854, lon: 73.7125 },
+  Amritsar: { lat: 31.6340, lon: 74.8723 },
+  Allahabad: { lat: 25.4358, lon: 81.8463 },
+  Tirupati: { lat: 13.6288, lon: 79.4192 },
+  Nellore: { lat: 14.4426, lon: 79.9865 },
+  Kurnool: { lat: 15.8281, lon: 78.0373 },
+  Vijayawada: { lat: 16.5062, lon: 80.6480 },
+  Warangal: { lat: 17.9784, lon: 79.5941 },
+  Hubli: { lat: 15.3647, lon: 75.1240 },
+  Belgaum: { lat: 15.8497, lon: 74.4977 },
+  Jamshedpur: { lat: 22.8046, lon: 86.2029 },
+  Bhubaneswar: { lat: 20.2961, lon: 85.8245 },
+  Cuttack: { lat: 20.4625, lon: 85.8828 },
+  Siliguri: { lat: 26.7271, lon: 88.3953 },
+  Guwahati: { lat: 26.1445, lon: 91.7362 },
+  Shillong: { lat: 25.5788, lon: 91.8933 },
+  Gangtok: { lat: 27.3389, lon: 88.6065 },
+  Darjeeling: { lat: 27.0360, lon: 88.2627 },
+  Aizawl: { lat: 23.7271, lon: 92.7176 },
+  Imphal: { lat: 24.8170, lon: 93.9368 },
+  Agartala: { lat: 23.8315, lon: 91.2868 },
 };
 
 const haversineDistance = (lat1, lon1, lat2, lon2) => {
@@ -46,8 +86,26 @@ const getBaseCost = (vehicleType) => {
   return costMap[vehicleType] || 10;
 };
 
-const TransportBooking = () => {
-  // Remove local theme state, Navbar will handle theme toggle
+const showToast = (message, type) => {
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    background: ${type === 'success' ? '#4caf50' : '#f44336'};
+    color: white;
+    border-radius: 4px;
+    z-index: 1000;
+    font-family: sans-serif;
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => document.body.removeChild(toast), 3000);
+};
+
+const User = () => {
+  const { theme, toggleTheme } = useTheme();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [pickupLocation, setPickupLocation] = useState('');
@@ -57,19 +115,10 @@ const TransportBooking = () => {
   const [loading, setLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [cities, setCities] = useState([]);
-  const [toast, setToast] = useState({ show: false, message: '', type: '' });
-
-  // You can optionally use a theme context if you want dark/light mode to be global
-  // For now, we'll keep this simple and use default light theme styles
 
   useEffect(() => {
     setCities(Object.keys(cityCoordinates));
   }, []);
-
-  const showToast = (message, type) => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: '' }), 4000);
-  };
 
   const calculateCost = useCallback((pickup, dropoff, vehicle) => {
     if (!pickup || !dropoff || !vehicle) {
@@ -133,7 +182,7 @@ const TransportBooking = () => {
 
     try {
       if (estimatedCost !== null) {
-        const response = await fetch(`${API_BASE_URL}/api/bookings`, {
+        const response = await fetch('https://vipreshana-3.onrender.com/api/bookings', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -153,7 +202,7 @@ const TransportBooking = () => {
           throw new Error(data.message || 'Failed to save booking');
         }
 
-        showToast('Thanks for booking! Your ride is confirmed 🚗', 'success');
+        showToast('Thanks for booking! 💛', 'success');
         resetForm();
       } else {
         showToast('Error: Please select valid locations and vehicle type.', 'error');
@@ -165,280 +214,166 @@ const TransportBooking = () => {
     }
   };
 
-  const getVehicleIcon = (type) => {
-    switch (type) {
-      case 'Car': return <Car className="w-5 h-5" />;
-      case 'Van': return <Truck className="w-5 h-5" />;
-      case 'Bus': return <Bus className="w-5 h-5" />;
-      default: return <Car className="w-5 h-5" />;
-    }
-  };
-
-  const getVehicleBadgeColor = (type) => {
-    switch (type) {
-      case 'Car': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Van': return 'bg-green-100 text-green-800 border-green-200';
-      case 'Bus': return 'bg-purple-100 text-purple-800 border-purple-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  // Set light as default, but if you want global theme, use context/provider
-  const isDark = false;
+  const isDark = theme === 'dark';
 
   return (
-    <div className={`min-h-screen transition-all duration-500 ${
-      isDark 
-        ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900' 
-        : 'bg-gradient-to-br from-indigo-50 via-white to-cyan-50'
-    } flex items-center justify-center p-4 sm:p-6 lg:p-8`}>
-      
-      <Navbar /> {/* Render Navbar at the top */}
+    <div
+      className={`min-h-screen bg-cover bg-center flex items-center justify-center p-5 ${
+        isDark ? 'dark' : ''
+      }`}
+      style={{
+        backgroundImage: `url('https://images.pexels.com/photos/681335/pexels-photo-681335.jpeg?auto=compress&cs=tinysrgb&w=600')`,
+        filter: isDark ? 'brightness(0.7)' : 'brightness(1)',
+      }}
+    >
+      <div className={`${
+        isDark 
+          ? 'bg-gray-800 bg-opacity-90 text-white' 
+          : 'bg-white bg-opacity-80 text-gray-900'
+      } rounded-lg shadow-lg p-10 w-full max-w-lg relative`}>
+        
+        <button
+          onClick={toggleTheme}
+          className={`absolute top-4 right-4 p-2 rounded-full ${
+            isDark 
+              ? 'bg-gray-700 hover:bg-gray-600 text-yellow-300' 
+              : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+          } transition-colors duration-200`}
+          aria-label="Toggle theme"
+        >
+          {isDark ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
 
-      {toast.show && (
-        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg transform transition-all duration-300 backdrop-blur-sm ${
-          toast.type === 'success' 
-            ? 'bg-green-50/90 text-green-800 border border-green-200' 
-            : 'bg-red-50/90 text-red-800 border border-red-200'
+        <h1 className={`text-4xl font-bold text-center mb-8 ${
+          isDark ? 'text-blue-300' : 'text-blue-700'
         }`}>
-          {toast.type === 'success' ? (
-            <CheckCircle className="w-5 h-5" />
-          ) : (
-            <AlertCircle className="w-5 h-5" />
-          )}
-          <span className="text-sm font-medium">{toast.message}</span>
-        </div>
-      )}
-
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute -top-1/2 -right-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse ${
-          isDark 
-            ? 'bg-gradient-to-br from-blue-600/20 to-purple-800/20' 
-            : 'bg-gradient-to-br from-blue-400/20 to-purple-600/20'
-        }`}></div>
-        <div className={`absolute -bottom-1/2 -left-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse ${
-          isDark 
-            ? 'bg-gradient-to-tr from-cyan-600/20 to-blue-800/20' 
-            : 'bg-gradient-to-tr from-cyan-400/20 to-blue-600/20'
-        }`} style={{animationDelay: '1s'}}></div>
-      </div>
-
-      <div className="relative w-full max-w-4xl mx-auto">
-        <div className={`backdrop-blur-sm rounded-2xl shadow-xl border p-6 sm:p-8 lg:p-12 ${
-          isDark
-            ? 'bg-gray-800/80 border-gray-700/50'
-            : 'bg-white/80 border-white/20'
-        }`}>
-          
-          <div className="text-center mb-8 relative">
-            {/* Remove theme toggle button, Navbar handles theme */}
-            <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-lg ${
-              isDark
-                ? 'bg-gradient-to-br from-blue-600 to-purple-600'
-                : 'bg-gradient-to-br from-blue-500 to-blue-600'
-            }`}>
-              <Navigation className="w-8 h-8 text-white" />
-            </div>
-            
-            <h1 className={`text-2xl sm:text-4xl font-bold mb-2 ${
-              isDark
-                ? 'bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent'
-                : 'bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent'
-            }`}>
-              Book Your Ride
-            </h1>
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Fast, reliable transportation at your fingertips
-            </p>
+          Book Your Vehicle
+        </h1>
+        
+        <div>
+          <div className="mb-4">
+            <label className={`block ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg ${
+                isDark 
+                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            />
           </div>
-
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className={`flex items-center gap-2 text-sm font-medium ${
-                  isDark ? 'text-gray-300' : 'text-gray-700'
-                }`}>
-                  <User className="w-4 h-4" />
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={`w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                   isDark 
-                      ? 'bg-gray-700/50 border-gray-600/50 hover:text-white placeholder-gray-400 hover:bg-gray-700 text-gray-600' 
-                      : 'bg-gray-50/50 border-gray-200 text-gray-900 hover:bg-white'
-                  }`}
-                  placeholder="Enter your full name"
-                />
+          
+          <div className="mb-4">
+            <label className={`block ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              Phone
+            </label>
+            <input
+              type="text"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg ${
+                isDark 
+                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className={`block ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              Pickup Location
+            </label>
+            <select
+              value={pickupLocation}
+              onChange={(e) => setPickupLocation(e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg ${
+                isDark 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            >
+              <option value="">Select Pickup Location</option>
+              {cities.map((city, index) => (
+                <option key={index} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className={`block ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              Dropoff Location
+            </label>
+            <select
+              value={dropoffLocation}
+              onChange={(e) => setDropoffLocation(e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg ${
+                isDark 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            >
+              <option value="">Select Dropoff Location</option>
+              {cities.map((city, index) => (
+                <option key={index} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className={`block ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              Vehicle Type
+            </label>
+            <select
+              value={vehicleType}
+              onChange={(e) => setVehicleType(e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg ${
+                isDark 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            >
+              <option value="">Select Vehicle Type</option>
+              <option value="Car">Car</option>
+              <option value="Van">Van</option>
+              <option value="Bus">Bus</option>
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            {calculating ? (
+              <div className={`text-center ${isDark ? 'text-blue-300' : 'text-blue-500'}`}>
+                Calculating Cost...
               </div>
-
-              <div className="space-y-2">
-                <label className={`flex items-center gap-2 text-sm font-medium ${
-                  isDark ? 'text-gray-300' : 'text-gray-700'
-                }`}>
-                  <Phone className="w-4 h-4" />
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={`w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                    isDark 
-                      ? 'bg-gray-700/50 border-gray-600/50 hover:text-white placeholder-gray-400 hover:bg-gray-700 text-gray-600' 
-                      : 'bg-gray-50/50 border-gray-200 text-gray-900 hover:bg-white'
-                  }`}
-                  placeholder="Enter your phone number"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className={`flex items-center gap-2 text-sm font-medium ${
-                  isDark ? 'text-gray-300' : 'text-gray-700'
-                }`}>
-                  <MapPin className="w-4 h-4 text-green-500" />
-                  Pickup Location
-                </label>
-                <select
-                  value={pickupLocation}
-                  onChange={(e) => setPickupLocation(e.target.value)}
-                  className={`w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                    isDark 
-                      ? 'bg-gray-700/50 border-gray-600/50 hover:text-white placeholder-gray-400 hover:bg-gray-700 text-gray-600' 
-                      : 'bg-gray-50/50 border-gray-200 text-gray-900 hover:bg-white'
-                  }`}
-                >
-                  <option value="">Select pickup location</option>
-                  {cities.map((city, index) => (
-                    <option key={index} value={city}>{city}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className={`flex items-center gap-2 text-sm font-medium ${
-                  isDark ? 'text-gray-300' : 'text-gray-700'
-                }`}>
-                  <MapPin className="w-4 h-4 text-red-500" />
-                  Drop-off Location
-                </label>
-                <select
-                  value={dropoffLocation}
-                  onChange={(e) => setDropoffLocation(e.target.value)}
-                  className={`w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                    isDark 
-                      ? 'bg-gray-700/50 border-gray-600/50 hover:text-white placeholder-gray-400 hover:bg-gray-700 text-gray-600' 
-                      : 'bg-gray-50/50 border-gray-200 text-gray-900 hover:bg-white'
-                  }`}
-                >
-                  <option value="">Select drop-off location</option>
-                  {cities.map((city, index) => (
-                    <option key={index} value={city}>{city}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Vehicle Selection */}
-            <div className="space-y-4">
-              <label className={`flex items-center gap-2 text-sm font-medium ${
-                isDark ? 'text-gray-300' : 'text-gray-700'
+            ) : (
+              <div className={`text-center font-semibold text-xl ${
+                isDark ? 'text-green-300' : 'text-green-600'
               }`}>
-                <Car className="w-4 h-4" />
-                Vehicle Type
-              </label>
-              <div className="relative">
-                <select
-                  value={vehicleType}
-                  onChange={(e) => setVehicleType(e.target.value)}
-                  className={`w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer ${
-                    isDark 
-                      ? 'bg-gray-700/50 border-gray-600/50 hover:text-white placeholder-gray-400 hover:bg-gray-700 text-gray-600' 
-                      : 'bg-gray-50/50 border-gray-200 text-gray-900 hover:bg-white'
-                  }`}
-                >
-                  <option value="">Choose your vehicle</option>
-                  <option value="Car">🚗 Car - Comfortable & Quick</option>
-                  <option value="Van">🚐 Van - Spacious & Reliable</option>
-                  <option value="Bus">🚌 Bus - Group Travel</option>
-                </select>
-                {vehicleType && (
-                  <div className={`absolute right-12 top-1/2 transform -translate-y-1/2 px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-2 ${
-                    isDark ? 'bg-gray-600 border-gray-500 text-gray-200' : getVehicleBadgeColor(vehicleType)
-                  }`}>
-                    {getVehicleIcon(vehicleType)}
-                    <span>{vehicleType}</span>
-                  </div>
-                )}
+                Estimated Cost: ₹{estimatedCost !== null ? estimatedCost : 0}
               </div>
-            </div>
-            <div className={`rounded-xl p-6 border ${
-              isDark
-                ? 'bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-blue-800/30'
-                : 'bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200'
-            }`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Calculator className={`w-5 h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
-                  <span className={`font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Estimated Cost
-                  </span>
-                </div>
-                <div className="text-right">
-                  {calculating ? (
-                    <div className={`flex items-center gap-2 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
-                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm">Calculating...</span>
-                    </div>
-                  ) : (
-                    <div className={`text-2xl font-bold ${
-                      isDark ? 'text-green-400' : 'text-green-600'
-                    }`}>
-                      ₹{estimatedCost !== null ? estimatedCost.toLocaleString() : '0'}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
- 
+            )}
+          </div>
+          
+          <div className="flex justify-center">
             <button
               onClick={handleBooking}
-              disabled={loading || calculating}
-              className={`w-full p-4 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] ${
+              className={`w-full py-2 px-4 rounded-lg font-medium transition-colors duration-200 ${
                 isDark
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
-                  : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
-              }`}
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              disabled={loading || calculating}
             >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Booking Your Ride...
-                </div>
-              ) : (
-                <div className="flex items-center justify-center gap-2">
-                  <Sparkles className="w-5 h-5" />
-                  Book Now
-                </div>
-              )}
+              {loading ? 'Booking...' : 'Book Now'}
             </button>
           </div>
-        </div>
-
-
-        <div className="text-center mt-6">
-          <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-            Safe, reliable transportation • Available 24/7 • Trusted by thousands
-          </p>
         </div>
       </div>
     </div>
   );
 };
 
-export default TransportBooking;
+export default User;
