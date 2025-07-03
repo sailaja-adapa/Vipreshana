@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from './context/ThemeContext'; 
 import { useAuth } from './context/AuthContext';
-import { Typewriter } from "./components/Typewriter"; // Import Typewriter component
+import { Typewriter } from "./components/Typewriter";
 import Navbar from './components/Navbar';
-// import FAQSection from './components/FAQs'; //importing faq section
-// import {typewriter} from 'react-typewriter-text'; // Commented out as package may not exist
+
 
 const Dashboard = () => {
     const { theme } = useTheme();
