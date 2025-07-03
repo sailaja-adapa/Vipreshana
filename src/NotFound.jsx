@@ -20,7 +20,6 @@ import {
   Play
 } from 'lucide-react';
 
-// Enhanced game levels with power-ups and moving obstacles
 const LEVELS = [
   {
     id: 1,

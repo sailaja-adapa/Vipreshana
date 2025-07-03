@@ -7,7 +7,6 @@ const Layout = () => {
     <>
       <Navbar />
       <main className="min-h-screen pt-[4.5rem] md:pt-[4rem]">
-        {/* Adjust `4.5rem` to match your navbar height */}
         <Outlet />
       </main>
     </>

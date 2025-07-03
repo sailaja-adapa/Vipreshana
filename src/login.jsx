@@ -46,11 +46,11 @@ const Login = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     cleanUrlOfTokens();
-
    const validIndianNumber = /^[6-9]\d{9}$/;
 const allowedTestPhones = ['4444444444', '1212122121']; // Add more if needed
 
