@@ -6,7 +6,7 @@ labels: ''
 assignees: ''
 ---
 
-Thank you for submitting a custom issue for **Shresta-City Insight**!  
+Thank you for submitting a custom issue for **Vipreshana**!  
 This template is intended for any requests or suggestions that don't fit into the bug report, feature request, or documentation categories.
 
 ---
