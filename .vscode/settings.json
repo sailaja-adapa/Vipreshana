@@ -10,5 +10,6 @@
         "Toastify",
         "Vipreshana",
         "XVCJ"
-    ]
+    ],
+    "files.autoSaveWhenNoErrors": true
 }
