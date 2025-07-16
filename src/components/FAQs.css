@@ -1,5 +1,5 @@
 .faq-section {
-  max-width:100%;
+  max-width: 100%;
   margin: 0rem auto;
   padding: 1rem;
   background-color: #ffffff;
@@ -11,7 +11,7 @@
   color: #f3f4f6;
 }
 
-.faq-section h3{
+.faq-section h3 {
   font-size: 30px;
   text-align: center;
   margin-bottom: 1rem;
@@ -20,8 +20,18 @@
   letter-spacing: -0.02em;
 }
 
-.faq-section.dark h3{
+.faq-section.dark h3 {
   color: #f9fafb;
+}
+
+/* ✅ Added search input style from Code 4 */
+.faq-search {
+  padding: 10px;
+  width: 90%;
+  max-width: 500px;
+  margin: 15px 0 25px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .faq-item {
@@ -39,10 +49,6 @@
   border-color: #4b5563;
 }
 
-.faq-question.dark{
-    background-color: #111827;
-    color:white;
-}
 .faq-question {
   padding: 1rem 1.25rem;
   cursor: pointer;
@@ -56,6 +62,16 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* ✅ Ensure dark mode for question */
+.faq-question.dark {
+  background-color: #111827;
+  color: white;
+}
+
+.faq-section.dark .faq-question {
+  background: #333;
+}
+
 .faq-item:hover .faq-question {
   background-color: #d5c0ff;
 }
@@ -63,10 +79,6 @@
 .faq-item.active .faq-question {
   background-color: #000028;
   color: #ffffff;
-}
-.faq-question.dark{
-    background-color: #111827;
-    color:white;
 }
 
 .faq-answer {
@@ -81,7 +93,7 @@
   transition: max-height 0.4s ease, padding 0.4s ease;
 }
 
-.faq-section.dark .faq-answer .faq-section{
+.faq-section.dark .faq-answer {
   background-color: #1f2937;
   color: #d1d5db;
 }
