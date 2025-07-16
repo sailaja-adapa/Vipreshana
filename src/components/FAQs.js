@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './FAQs.css';
-
+//faq data
 const faqData = [
     {
         question: 'What is Vipreshana?',
@@ -30,27 +30,15 @@ const faqData = [
 
 const FAQSection = ({ isDark }) => {
     const [activeIndex, setActiveIndex] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
 
     const toggleFAQ = (index) => {
         setActiveIndex(activeIndex === index ? null : index);
     };
 
-    const filteredFAQs = faqData.filter((faq) =>
-        faq.question.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
     return (
         <section className={`faq-section ${isDark ? 'dark' : ''}`}>
             <h3>Frequently Asked Questions</h3>
-            <input
-                type="text"
-                placeholder="Search FAQs..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="faq-search"
-            />
-            {filteredFAQs.map((item, index) => (
+            {faqData.map((item, index) => (
                 <div
                     key={index}
                     className={`faq-item ${activeIndex === index ? 'active' : ''}`}
