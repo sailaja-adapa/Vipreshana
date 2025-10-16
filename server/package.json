@@ -14,6 +14,7 @@
   "dependencies": {
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+      "cors": "^2.8.5",
     "express-rate-limit": "^7.5.1",
     "figlet": "^1.8.1",
     "mongoose": "^8.15.2",
