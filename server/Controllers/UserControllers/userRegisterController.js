@@ -8,32 +8,6 @@ const sanitize = (str) => {
     return str?.trim().replace(/[<>"'\/]/g, '');
 };
 
-// Password validation function
-const validatePassword = (password) => {
-    const errors = [];
-    
-    if (!password || password.length < 8) {
-        errors.push('Password must be at least 8 characters long');
-    }
-    if (!/[A-Z]/.test(password)) {
-        errors.push('Password must contain at least one uppercase letter (A-Z)');
-    }
-    if (!/[a-z]/.test(password)) {
-        errors.push('Password must contain at least one lowercase letter (a-z)');
-    }
-    if (!/\d/.test(password)) {
-        errors.push('Password must contain at least one number (0-9)');
-    }
-    if (!/[@$!%*?#&]/.test(password)) {
-        errors.push('Password must contain at least one special character (@$!%*?#&)');
-    }
-    
-    return {
-        isValid: errors.length === 0,
-        errors
-    };
-};
-
 
 
 const userRegisterController = async (req, res) => {
@@ -51,14 +25,6 @@ const userRegisterController = async (req, res) => {
         const existingUser = await Models.UserSchema.findOne({ $or: [{ email }, { phone }] });
         if (existingUser) {
             return res.status(400).json({ error: "Email or Phone already registered" });
-        }
-
-        // Validate password strength
-        const passwordValidation = validatePassword(password);
-        if (!passwordValidation.isValid) {
-            return res.status(400).json({ 
-                error: "Password does not meet security requirements: " + passwordValidation.errors.join(', ')
-            });
         }
 
         // Verify OTP before registration (check for either phone or email verification)
