@@ -11,30 +11,36 @@ const Controllers = require('./Controllers/index.controllers');
 const { otpRateLimiter, otpVerificationRateLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
-app.set('trust proxy', 1); // ✅ Fix for Render proxy issue causing ValidationError
 const PORT = process.env.PORT || 3001;
 
 const allowedOrigins = [
-  'http://localhost:3000',
-  'https://vipreshana-2.vercel.app'
+  'http://localhost:3000',              // dev frontend
+  'http://localhost:3001',              // dev frontend (alternative port)
+  'https://vipreshana-2.vercel.app',    // deployed frontend
+  'https://vipreshana-2-git-fork-thulasipri-c030df-sailaja-adapas-projects.vercel.app'  // forked frontend
 ];
 
 // ✅ Updated CORS Configuration
+// For local testing: allows any localhost origin
+// For production: only allows specific origins
 app.use(cors({
   origin: function (origin, callback) {
     console.log('🔍 CORS check for origin:', origin);
     console.log('📋 Allowed origins:', allowedOrigins);
     
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) {
       console.log('✅ Allowing request with no origin');
       return callback(null, true);
     }
     
+    // Allow localhost on any port for development (local testing)
     if (origin.startsWith('http://localhost:')) {
       console.log('✅ Allowing localhost origin:', origin);
       return callback(null, true);
     }
     
+    // Allow specific origins (production)
     if (allowedOrigins.includes(origin)) {
       console.log('✅ Allowing specific origin:', origin);
       return callback(null, true);
@@ -60,6 +66,8 @@ app.use((req, res, next) => {
 });
 
 // ✅ MongoDB connection
+// For local testing: uses localhost if MONGO_CONNECTION_STRING is not set
+// For production: uses MONGO_CONNECTION_STRING from environment variables
 const mongoURI = process.env.MONGO_CONNECTION_STRING || 'mongodb://localhost:27017/vipreshana';
 connectMongoDB(Configs.DB_URI);
 
@@ -128,6 +136,7 @@ app.post('/api/reset-password', Controllers.ResetPasswordController);
 
 // ✅ Bookings
 app.post('/api/bookings', Controllers.BookingController);
+// Route to retrieve bookings by phone number - fixes issue where users couldn't see their bookings even though booking on that phone number was already made
 app.get('/api/bookings/:phone', Controllers.GetBookingByPhoneController); 
 app.get('/api/details', Controllers.GetAllBookingController);
 
@@ -145,14 +154,19 @@ app.post('/api/login', async (req, res) => {
     console.log('🔍 Parsed values:', { phone, email, password });
 
     if (!password) {
+      console.log('❌ No password provided');
       return res.status(400).json({ message: 'Password is required.' });
     }
 
     if (!phone && !email) {
+      console.log('❌ No phone or email provided');
       return res.status(400).json({ message: 'Phone number or email is required.' });
     }
 
+    // Find user by phone or email
     let user;
+    console.log('🔍 Login attempt:', { phone, email });
+    
     if (phone) {
       user = await Registration.findOne({ phone });
       console.log('📱 Searching by phone:', phone, 'User found:', !!user);
@@ -162,7 +176,9 @@ app.post('/api/login', async (req, res) => {
     }
 
     if (!user) {
-      return res.status(404).json({ message: 'No user found with this phone number or email.' });
+      return res.status(404).json({ 
+        message: 'No user found with this phone number or email.' 
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
