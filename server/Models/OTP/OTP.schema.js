@@ -40,7 +40,7 @@ const otpSchema = new mongoose.Schema({
         index: { expireAfterSeconds: 0 } 
     },
     attempts: {
-        type: Number, 
+        type: Number,
         default: 0
     },
     maxAttempts: {
