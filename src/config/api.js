@@ -8,7 +8,7 @@ const PRODUCTION_API_URL = 'https://vipreshana-3.onrender.com';
 const LOCAL_API_URL = 'http://localhost:5000';
 
 // Choose API URL based on environment
-const API_BASE_URL = isDevelopment ? LOCAL_API_URL : PRODUCTION_API_URL;
+const API_BASE_URL = 'https://vipreshana-3.onrender.com';
 
 // Log the current configuration (for debugging)
 if (isDevelopment) {
