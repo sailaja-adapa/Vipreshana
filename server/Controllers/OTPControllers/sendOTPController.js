@@ -103,7 +103,6 @@ const sendOTPController = async (req, res) => {
             success: false,
             error: "Failed to send OTP"
         });
-        
     }
 };
 
