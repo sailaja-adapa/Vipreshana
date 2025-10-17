@@ -11,10 +11,8 @@ import { useTheme } from './context/ThemeContext';
 import OTPVerification from './components/OTPVerification';
 import LiveBackgroundLight from './components/livebackground/LiveBackgroundLight';
 import LiveBackgroundDark from './components/livebackground/LiveBackgroundDark';
-import PasswordStrengthIndicator from './components/PasswordStrengthIndicator';
 
 import API_BASE_URL from './config/api';
-import { validatePassword } from './utils/passwordStrength';
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -33,18 +31,27 @@ const RegistrationForm = () => {
   const [choiceForOTP, setChoiceForOTP] = useState(''); // 'sms' or 'email'
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const navigate = useNavigate();
-  const [passwordValidation, setPasswordValidation] = useState(null);
+  const [passwordStrength, setPasswordStrength] = useState('');
+
 
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+
+   const checkPasswordStrength = (password) => {
+    const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/;
+    const moderateRegex = /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{6,}$/;
+
+    if (strongRegex.test(password)) return 'Strong';
+    else if (moderateRegex.test(password)) return 'Moderate';
+    else return 'Weak';
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
     if (name === 'password') {
-      const validation = validatePassword(value);
-      setPasswordValidation(validation);
+      setPasswordStrength(checkPasswordStrength(value));
     }
 
     if (error) setError('');
@@ -53,15 +60,6 @@ const RegistrationForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    // Password validation
-    if (formData.password) {
-      const validation = validatePassword(formData.password);
-      if (!validation.isValid) {
-        setError('Please fix password requirements: ' + validation.errors.join(', '));
-        return;
-      }
-    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
@@ -228,65 +226,40 @@ const RegistrationForm = () => {
 
               {/* Passwords */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Password Field */}
-                <div>
-                  <label className={`block mb-1 text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                      className={`w-full p-3 pr-12 rounded-lg border shadow-sm transition-all duration-200 ${
-                        isDark
-                          ? 'bg-gray-800 border-gray-600 text-white'
-                          : 'bg-white border border-gray-300 text-gray-900'
-                      }`}
-                      placeholder="Create a password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                  {/* Password Strength Indicator */}
-                  <PasswordStrengthIndicator password={formData.password} isDark={isDark} />
-                </div>
+                {[
+                  ['password', showPassword, setShowPassword], 
+                  ['confirmPassword', showConfirmPassword, setShowConfirmPassword]
+                ].map(([name, show, setShow], i) => (
+                  <div key={i}>
+                    <label className={`block mb-1 text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      {name === 'password' ? 'Password' : 'Confirm Password'}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={show ? 'text' : 'password'}
+                        name={name}
+                        value={formData[name]}
+                        onChange={handleChange}
+                        required
+                        className={`w-full p-3 pr-12 rounded-lg border shadow-sm transition-all duration-200 ${
+                          isDark
+                            ? 'bg-gray-800 border-gray-600 text-white'
+                            : 'bg-white border border-gray-300 text-gray-900'
+                        }`}
+                        placeholder={name === 'password' ? 'Create a password' : 'Confirm password'}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShow(!show)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                    
 
-                {/* Confirm Password Field */}
-                <div>
-                  <label className={`block mb-1 text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      required
-                      className={`w-full p-3 pr-12 rounded-lg border shadow-sm transition-all duration-200 ${
-                        isDark
-                          ? 'bg-gray-800 border-gray-600 text-white'
-                          : 'bg-white border border-gray-300 text-gray-900'
-                      }`}
-                      placeholder="Confirm password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
                   </div>
-                </div>
+                ))}
               </div>
 
               {/* Phone & Role */}
