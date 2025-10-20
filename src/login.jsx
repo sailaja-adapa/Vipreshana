@@ -24,6 +24,13 @@ const Login = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  // --- Dummy accounts: change/add as needed ---
+  const dummyUsers = [
+    { phone: '9999999999', password: 'driver123', role: 'driver', name: 'Dummy Driver' },
+    { phone: '8888888888', password: 'admin123', role: 'admin', name: 'Dummy Admin' },
+    { email: 'test@example.com', password: 'test123', role: 'user', name: 'Dummy User' }
+  ];
+
   const cleanUrlOfTokens = () => {
     const currentUrl = window.location.toString();
     const hasSensitiveData =
@@ -46,7 +53,46 @@ const Login = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const attemptDummyLogin = () => {
+    return dummyUsers.find(u =>
+      (loginMethod === 'phone' && u.phone && u.phone === formData.phone && u.password === formData.password) ||
+      (loginMethod === 'email' && u.email && u.email === formData.email && u.password === formData.password)
+    );
+  };
+
+  const commitLoginLocally = (user, message = 'Logged in') => {
+    const safeUserData = {
+      id: user._id || `dummy-${Date.now()}`,
+      name: user.name || user.name || 'User',
+      phone: user.phone || formData.phone || '',
+      email: user.email || formData.email || '',
+      role: user.role || 'user'
+    };
+
+    localStorage.removeItem('user');
+    localStorage.setItem('user', JSON.stringify(safeUserData));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('authChange', { detail: { isAuthenticated: true, user: safeUserData } }));
+    window.dispatchEvent(new Event('login'));
+
+    toast.success(`🎉 ${message}`, {
+      toastId: 'login-success',
+      position: 'top-center',
+      autoClose: 1500,
+      style: {
+        backgroundColor: '#28a745',
+        color: '#fff',
+        fontSize: '18px',
+        fontWeight: 'bold',
+        borderRadius: '12px',
+        textAlign: 'center',
+      },
+    });
+
+    return safeUserData;
   };
 
   const handleSubmit = async (e) => {
@@ -54,13 +100,10 @@ const Login = () => {
     setIsLoading(true);
     cleanUrlOfTokens();
 
-    console.log('🔍 Login attempt:', { loginMethod, formData });
-
     // Validate based on login method
     if (loginMethod === 'phone') {
       const validIndianNumber = /^[6-9]\d{9}$/;
       const allowedTestPhones = ['4444444444', '1212122121', '1234567890', '0987654321'];
-
       if (!validIndianNumber.test(formData.phone) && !allowedTestPhones.includes(formData.phone)) {
         toast.error('⚠️ Enter a valid phone number');
         setIsLoading(false);
@@ -75,15 +118,41 @@ const Login = () => {
       }
     }
 
+    // 1) Try dummy login first
+    const matchedDummy = attemptDummyLogin();
+    if (matchedDummy) {
+      const safeUser = commitLoginLocally({
+        _id: `dummy-${Date.now()}`,
+        name: matchedDummy.name || 'Dummy User',
+        phone: matchedDummy.phone || '',
+        email: matchedDummy.email || '',
+        role: matchedDummy.role || 'user'
+      }, 'Dummy login successful!');
+
+      // redirect based on role after a short delay to allow toast to show
+      setTimeout(() => {
+        setIsLoading(false);
+        cleanUrlOfTokens();
+        let redirectPath = '/logindashboard';
+        if (matchedDummy.role === 'driver') redirectPath = '/driver';
+        else if (matchedDummy.role === 'admin') redirectPath = '/admin';
+        else redirectPath = location.state?.from || '/logindashboard';
+        navigate(redirectPath, { replace: true });
+      }, 500);
+
+      return;
+    }
+
+    // 2) If not dummy, proceed with real API login
     try {
-      // Prepare login data based on method
       const loginData = {
         password: formData.password,
         ...(loginMethod === 'phone' ? { phone: formData.phone } : { email: formData.email })
       };
 
-      console.log('📤 Sending login data:', loginData);
-      console.log('🔗 API URL:', `${API_BASE_URL}/api/login`);
+      // Debug logs (keep or remove in production)
+      // console.log('📤 Sending login data:', loginData);
+      // console.log('🔗 API URL:', `${API_BASE_URL}/api/login`);
 
       const response = await axios.post(`${API_BASE_URL}/api/login`, loginData, {
         withCredentials: true
@@ -92,43 +161,16 @@ const Login = () => {
       const { user, message } = response.data;
 
       if (user) {
-        const safeUserData = {
-          id: user._id,
-          name: user.name,
-          phone: user.phone,
-          email: user.email,
-          role: user.role
-        };
-
-        localStorage.removeItem("user");
-        localStorage.setItem("user", JSON.stringify(safeUserData));
-        window.dispatchEvent(new Event('storage'));
-        window.dispatchEvent(new CustomEvent('authChange', { detail: { isAuthenticated: true, user: safeUserData } }));
-        window.dispatchEvent(new Event('login'));
-
-        toast.success(`🎉 ${message}`, {
-          toastId: 'login-success',
-          position: 'top-center',
-          autoClose: 1500,
-          style: {
-            backgroundColor: '#28a745',
-            color: '#fff',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            borderRadius: '12px',
-            textAlign: 'center',
-          },
-        });
-
+        const safeUser = commitLoginLocally(user, message || 'Login successful!');
+        // redirect after toast
         setTimeout(() => {
           setIsLoading(false);
           cleanUrlOfTokens();
 
-          // 👇 Route based on credentials
-          let redirectPath = '/logindashboard';
-          if (loginMethod === 'phone' && formData.phone === '1234567890' && formData.password === '1212') {
+          let redirectPath = '/logindashboard'; // default
+          if (safeUser.role === 'driver') {
             redirectPath = '/driver';
-          } else if (loginMethod === 'phone' && formData.phone === '0987654321' && formData.password === '1212') {
+          } else if (safeUser.role === 'admin') {
             redirectPath = '/admin';
           } else {
             redirectPath = location.state?.from || '/logindashboard';
@@ -136,10 +178,28 @@ const Login = () => {
 
           navigate(redirectPath, { replace: true });
         }, 1500);
+      } else {
+        setIsLoading(false);
+        toast.error('⚠️ Login failed! No user returned.', {
+          toastId: 'login-error',
+          position: 'top-center',
+          autoClose: 3000,
+          style: {
+            backgroundColor: '#e60023',
+            color: '#fff',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            borderRadius: '12px',
+            textAlign: 'center',
+          },
+        });
       }
     } catch (error) {
       setIsLoading(false);
-      toast.error('⚠️ Login failed! Please try again.', {
+
+      // Prefer server-provided message if exists
+      const serverMessage = error?.response?.data?.message || error?.message || 'Login failed! Please try again.';
+      toast.error(`⚠️ ${serverMessage}`, {
         toastId: 'login-error',
         position: 'top-center',
         autoClose: 3000,
@@ -154,8 +214,6 @@ const Login = () => {
       });
     }
   };
-
-
 
   const isDisabled = loginMethod === 'phone' 
     ? (!formData.phone || !formData.password)
@@ -263,6 +321,7 @@ const Login = () => {
                       id="password"
                       name="password"
                       required
+                      value={formData.password}
                       onChange={handleChange}
                       style={{ backgroundColor: 'rgba(255,255,255,0.25)', color: isDark ? '#fff' : '#1a202c' }}
                       className="block w-full border rounded-xl shadow-sm p-3 backdrop-blur-sm border-white/40"
