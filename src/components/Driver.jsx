@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import Navbar from './Navbar'; // <-- IMPORT NAVBAR!
 import { User, Phone, MapPin, Navigation, Package, DollarSign, Truck, Clock, CheckCircle } from 'lucide-react';
 
-import API_BASE_URL from '../config/api';
+const API_BASE_URL = 'https://vipreshana-3.onrender.com';
 
 const Driver = () => {
     const [bookings, setBookings] = useState([]);
